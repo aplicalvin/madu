@@ -33,6 +33,10 @@ def create_sidebar(window, frame_content, current_page):
                                 command=lambda: update_page(window, frame_content, "ekuitas", current_page))
     button_ekuitas.grid(row=5, column=0, pady=10, sticky="ew")
 
+    button_ekuitas = ttk.Button(frame_sidebar, text="Pengaturan", 
+                                command=lambda: update_page(window, frame_content, "setting", current_page))
+    button_ekuitas.grid(row=6, column=0, pady=10, sticky="ew")
+
     return frame_sidebar
 
 # Fungsi untuk memperbarui halaman sesuai dengan pilihan di sidebar
