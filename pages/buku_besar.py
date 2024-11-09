@@ -36,7 +36,7 @@ def tampilkan_data(tree_frame, account_number):
     label_account.pack(pady=5)
 
     # Tabel untuk menampilkan data
-    columns = ("Tanggal", "Keterangan", "Ref", "Debit", "Kredit")
+    columns = ("Tanggal", "Keterangan", "Ref", "Debit", "Kredit", "Updt. Saldo")
     tree = ttk.Treeview(tree_frame, columns=columns, show="headings")
     for col in columns:
         tree.heading(col, text=col)
@@ -44,7 +44,8 @@ def tampilkan_data(tree_frame, account_number):
 
     # Isi data ke dalam tabel
     for row in data:
-        tree.insert('', 'end', values=(row[1], row[3], "JU", row[5], row[6]))  # Menampilkan data yang sesuai
+        # Menampilkan data yang sesuai: Tanggal, Keterangan, Ref, Debit, Kredit, Saldo
+        tree.insert('', 'end', values=(row[1], row[3], "JU", row[5], row[6], row[7]))  # Menambahkan upd_saldo di kolom ke-6
 
     # Hitung total debit dan kredit
     total_debit, total_kredit = hitung_total(data)

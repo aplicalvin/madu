@@ -5,11 +5,28 @@ import sqlite3
 from datetime import datetime
 
 # Fungsi untuk menambah data ke database
-def tambah_data(tanggal, no_produk, no_akun, nama_akun, debet, kredit):
+def tambah_data(tanggal, no_produk, no_akun, keterangan, debet, kredit):
     conn = sqlite3.connect('data.db')
     c = conn.cursor()
-    c.execute("INSERT INTO data_akuntansi (tanggal, no_produk, no_akun, nama_akun, debet, kredit) VALUES (?, ?, ?, ?, ?, ?)",
-              (tanggal, no_produk, no_akun, nama_akun, debet, kredit))
+
+    # Ambil saldo kumulatif dari semua transaksi yang ada di database
+    c.execute("SELECT SUM(kredit) - SUM(debet) FROM data_akuntansi")
+    saldo_total = c.fetchone()[0]  # Saldo kumulatif dari semua transaksi
+
+    # Jika saldo_total None (belum ada transaksi sebelumnya), set saldo_total ke 0
+    if saldo_total is None:
+        saldo_total = 0
+
+    # Update saldo berdasarkan debit atau kredit
+    if debet > 0:
+        saldo_total -= debet  # Kurangi saldo jika ada debit
+    elif kredit > 0:
+        saldo_total += kredit  # Tambah saldo jika ada kredit
+
+    # Insert data transaksi baru ke database dengan saldo kumulatif terbaru
+    c.execute("INSERT INTO data_akuntansi (tanggal, no_produk, no_akun, keterangan, debet, kredit, upd_saldo) VALUES (?, ?, ?, ?, ?, ?, ?)",
+              (tanggal, no_produk, no_akun, keterangan, debet, kredit, saldo_total))
+
     conn.commit()
     conn.close()
 
@@ -50,12 +67,12 @@ def popup_input_data(parent, tree, label_total_debit, label_total_kredit):
         tanggal = cal.get_date()
         no_produk = entry_no_produk.get()
         no_akun = entry_no_akun.get()
-        nama_akun = entry_nama_akun.get()
+        keterangan = entry_keterangan.get()
         debet = entry_debet.get()
         kredit = entry_kredit.get()
         
         # Validasi input
-        if not no_produk or not no_akun or not nama_akun or (not debet and not kredit):
+        if not no_produk or not no_akun or not keterangan or (not debet and not kredit):
             messagebox.showerror("Error", "Semua kolom harus diisi dengan benar!")
             return
         
@@ -68,7 +85,7 @@ def popup_input_data(parent, tree, label_total_debit, label_total_kredit):
             debet = 0
         
         # Simpan data ke database
-        tambah_data(tanggal, no_produk, no_akun, nama_akun, debet, kredit)
+        tambah_data(tanggal, no_produk, no_akun, keterangan, debet, kredit)
         tampilkan_data(tree, label_total_debit, label_total_kredit)  # Refresh tabel
         popup.destroy()
     
@@ -89,9 +106,9 @@ def popup_input_data(parent, tree, label_total_debit, label_total_kredit):
     entry_no_akun = tk.Entry(popup)
     entry_no_akun.grid(row=2, column=1)
     
-    tk.Label(popup, text="Nama Akun:").grid(row=3, column=0)
-    entry_nama_akun = tk.Entry(popup)
-    entry_nama_akun.grid(row=3, column=1)
+    tk.Label(popup, text="Keterangan:").grid(row=3, column=0)
+    entry_keterangan = tk.Entry(popup)
+    entry_keterangan.grid(row=3, column=1)
     
     tk.Label(popup, text="Debet:").grid(row=4, column=0)
     entry_debet = tk.Entry(popup)
@@ -103,6 +120,17 @@ def popup_input_data(parent, tree, label_total_debit, label_total_kredit):
     
     # Tombol untuk menyimpan data
     tk.Button(popup, text="Simpan", command=simpan_data).grid(row=6, columnspan=2)
+
+# Fungsi untuk mereset data (menghapus semua data di database)
+def reset_data(tree, label_total_debit, label_total_kredit):
+    conn = sqlite3.connect('data.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM data_akuntansi")  # Hapus semua data dari tabel
+    conn.commit()
+    conn.close()
+    
+    # Setelah reset, tampilkan data kosong di tabel dan perbarui total
+    tampilkan_data(tree, label_total_debit, label_total_kredit)
 
 # Fungsi untuk membuat halaman utama
 def create_page(parent):
@@ -126,10 +154,13 @@ def create_page(parent):
     # Frame untuk tombol tambah data
     frame_tambah_data = tk.Frame(page_frame)
     frame_tambah_data.pack(pady=10)
-    tk.Button(frame_tambah_data, text="Tambah Data", command=lambda: popup_input_data(page_frame, tree, label_total_debit, label_total_kredit)).pack()
+    tk.Button(frame_tambah_data, text="Tambah Data", command=lambda: popup_input_data(page_frame, tree, label_total_debit, label_total_kredit)).pack(side="left", padx=5)
+    
+    # Tombol reset data
+    tk.Button(frame_tambah_data, text="Reset Data", command=lambda: reset_data(tree, label_total_debit, label_total_kredit)).pack(side="left", padx=5)
 
     # Tabel untuk menampilkan data
-    columns = ("Tanggal", "No. Produk", "No. Akun", "Nama Akun", "Debet", "Kredit")
+    columns = ("Tanggal", "No. Produk", "No. Akun", "Keterangan", "Debet", "Kredit")
     tree = ttk.Treeview(page_frame, columns=columns, show="headings")
     for col in columns:
         tree.heading(col, text=col)
