@@ -6,7 +6,7 @@ from style import apply_styles
 # GUI utama
 window = tk.Tk()
 window.title("Program Aplikasi Akuntansi")
-window.geometry("1200x600")
+window.geometry("1280x720")
 
 # Terapkan styling dari file style.py
 apply_styles(window)
@@ -22,6 +22,10 @@ frame_content.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 # Membuat sidebar di kiri
 current_page = "dashboard"  # Set halaman default
 create_sidebar(window, frame_content, current_page)
+
+# Menambahkan header di bagian konten utama
+header = tk.Label(frame_content, text="Dashboard", font=("Arial", 18), bg="sky blue", anchor="w", padx=20)
+header.pack(fill="x", pady=10)
 
 # Menjalankan aplikasi
 window.mainloop()
