@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import importlib
 
 # Fungsi untuk membuat sidebar/navbar
 def create_sidebar(window, frame_content, current_page):
@@ -28,35 +29,23 @@ def create_sidebar(window, frame_content, current_page):
 
 # Fungsi untuk memperbarui halaman sesuai dengan pilihan di sidebar
 def update_page(window, frame_content, page_name, current_page):
+    # Hanya lakukan perubahan halaman jika halaman yang dipilih berbeda
     if page_name != current_page:
-        current_page = load_page(window, frame_content, page_name, current_page)
-    return current_page
-
-# Fungsi untuk memuat halaman sesuai dengan pilihan di sidebar
-def load_page(window, frame_content, page_name, current_page):
-    # Bersihkan frame konten lama hanya jika halaman berbeda
-    if page_name != current_page:
+        # Hapus konten lama
         for widget in frame_content.winfo_children():
             widget.destroy()
 
-    # Panggil halaman yang sesuai
-    if page_name == "main":
-        from main import load_page 
-        # aku ingin ketika main dijalankan, dia akan nge load function pertama di halaman main 
-        load_page(window, frame_content)
-    elif page_name == "buku_besar":
-        from pages.buku_besar import load_page
-        load_page(window, frame_content)
-    elif page_name == "neraca_saldo":
-        from pages.neraca_saldo import load_page
-        load_page(window, frame_content)
-    elif page_name == "laba_rugi":
-        from pages.laba_rugi import load_page
-        load_page(window, frame_content)
-    elif page_name == "ekuitas":
-        from pages.ekuitas import load_page
-        load_page(window, frame_content)
+        # Memuat halaman baru berdasarkan nama halaman
+        load_page(window, frame_content, page_name)
 
-    # Update current page untuk memastikan navigasi berfungsi
-    current_page = page_name
-    return current_page
+    return page_name
+
+# Fungsi untuk memuat halaman berdasarkan nama
+def load_page(window, frame_content, page_name):
+    # Coba import file halaman dengan menggunakan importlib
+    try:
+        # Import halaman sesuai dengan nama file (misalnya buku_besar.py menjadi buku_besar)
+        page_module = importlib.import_module(f"pages.{page_name}")
+        page_module.create_page(frame_content)  # Setiap halaman harus punya fungsi create_page
+    except ModuleNotFoundError:
+        print(f"Halaman {page_name} tidak ditemukan.")
