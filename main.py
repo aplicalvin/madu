@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 from tkcalendar import Calendar
 import sqlite3
 from datetime import datetime
+from style import apply_styles
 
 # Fungsi untuk membuat koneksi dan tabel di database SQLite
 def create_db():
@@ -115,31 +116,36 @@ def popup_input_data():
     entry_kredit = tk.Entry(popup)
     entry_kredit.grid(row=5, column=1)
     
-    # Tombol untuk menyimpan data
-    tk.Button(popup, text="Simpan", command=simpan_data).grid(row=6, columnspan=2)
+    # Tombol untuk menyimpan data (gunakan ttk.Button untuk styling)
+    ttk.Button(popup, text="Simpan", command=simpan_data, style="TButton").grid(row=6, columnspan=2)
 
 
 # GUI utama
 window = tk.Tk()
 window.title("Program Aplikasi Akuntansi")
-window.geometry("800x600")
+window.geometry("1200x600")
+
+# Terapkan styling dari file style.py
+apply_styles(window)
 
 # Label dan Tombol untuk Menambah Data
-tk.Label(window, text="Program Aplikasi Akuntansi", font=("Arial", 18)).pack(pady=10)
-tk.Button(window, text="Tambah Data", command=popup_input_data).pack(pady=10)
+tk.Label(window, text="Program Aplikasi Akuntansi", font=("Arial", 18), bg="sky blue").pack(pady=10)
+
+# Ganti tk.Button dengan ttk.Button
+ttk.Button(window, text="Tambah Data", command=popup_input_data, style="TButton").pack(pady=10)
 
 # Tabel untuk menampilkan data
 columns = ("Tanggal", "No. Produk", "No. Akun", "Nama Akun", "Debet", "Kredit")
-tree = ttk.Treeview(window, columns=columns, show="headings")
+tree = ttk.Treeview(window, columns=columns, show="headings", style="Treeview")
 for col in columns:
     tree.heading(col, text=col)
 tree.pack(pady=10)
 
-# Label untuk menampilkan Total Debit dan Kredit
-label_total_debit = tk.Label(window, text="Total Debit: 0")
+# Ganti tk.Label dengan ttk.Label
+label_total_debit = ttk.Label(window, text="Total Debit: 0", style="TLabel")
 label_total_debit.pack(pady=5)
 
-label_total_kredit = tk.Label(window, text="Total Kredit: 0")
+label_total_kredit = ttk.Label(window, text="Total Kredit: 0", style="TLabel")
 label_total_kredit.pack(pady=5)
 
 # Membuat database jika belum ada
