@@ -2,16 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 import sqlite3
 
-# Data manual untuk nomor akun dan nama rekening
-akun_manual = {
-    101: "Kas",
-    102: "Persediaan",
-    103: "Perlengkapan Tojo",
-    401: "Penjualan",
-    501: "Beban Listrik dan Wifi",
-    502: "HPP"
-}
-
 # Fungsi untuk mengambil data berdasarkan No. Akun
 def get_data_by_account(account_number):
     conn = sqlite3.connect('data.db')
@@ -29,8 +19,18 @@ def hitung_total(data):
 
 # Fungsi untuk mengambil Nama Rekening berdasarkan No. Akun dari data manual
 def get_account_name(account_number):
-    # Cari nama rekening berdasarkan No. Akun
-    return akun_manual.get(account_number, "Tidak Ditemukan")
+    conn = sqlite3.connect('data.db')
+    c = conn.cursor()
+
+    # Query untuk mengambil nama rekening berdasarkan no_akun
+    c.execute("SELECT nama_rekening FROM akun WHERE no_akun = ?", (account_number,))
+    result = c.fetchone()  # Ambil hasil pertama (harusnya hanya ada satu)
+
+    conn.close()
+
+    # Jika ditemukan, kembalikan nama rekening, jika tidak ada, kembalikan "Tidak Ditemukan"
+    return result[0] if result else "Tidak Ditemukan"
+
 
 # Fungsi untuk menampilkan data dalam satu tabel yang meringkas semua akun
 def tampilkan_data(tree_frame):
