@@ -4,6 +4,7 @@ from tkcalendar import Calendar
 import sqlite3
 from datetime import datetime
 from style import apply_styles
+import importlib
 
 # Fungsi untuk membuat koneksi dan tabel di database SQLite
 def create_db():
@@ -120,6 +121,16 @@ def popup_input_data():
     ttk.Button(popup, text="Simpan", command=simpan_data, style="TButton").grid(row=6, columnspan=2)
 
 
+# Fungsi untuk membuka halaman
+def open_page(page_name):
+    try:
+        # Dinamis import halaman dari folder /pages
+        page = importlib.import_module(f'pages.{page_name}')
+        page.load_page(window)  # Panggil fungsi load_page di halaman tersebut
+    except Exception as e:
+        messagebox.showerror("Error", f"Halaman {page_name} gagal dibuka. Error: {e}")
+
+
 # GUI utama
 window = tk.Tk()
 window.title("Program Aplikasi Akuntansi")
@@ -128,24 +139,48 @@ window.geometry("1200x600")
 # Terapkan styling dari file style.py
 apply_styles(window)
 
-# Label dan Tombol untuk Menambah Data
-tk.Label(window, text="Program Aplikasi Akuntansi", font=("Arial", 18), bg="sky blue").pack(pady=10)
+# Frame untuk Sidebar
+frame_sidebar = tk.Frame(window, width=200, bg="sky blue", height=600, relief="sunken")
+frame_sidebar.pack(side="left", fill="y")
 
-# Ganti tk.Button dengan ttk.Button
-ttk.Button(window, text="Tambah Data", command=popup_input_data, style="TButton").pack(pady=10)
+# Frame untuk konten halaman
+frame_content = tk.Frame(window, bg="white")
+frame_content.pack(side="left", fill="both", expand=True)
+
+# Sidebar buttons
+button_jurnal = ttk.Button(frame_sidebar, text="Jurnal", command=lambda: tampilkan_data())
+button_jurnal.pack(pady=10, fill="x")
+
+button_buku_besar = ttk.Button(frame_sidebar, text="Buku Besar", command=lambda: open_page('buku_besar'))
+button_buku_besar.pack(pady=10, fill="x")
+
+button_neraca_saldo = ttk.Button(frame_sidebar, text="Neraca Saldo", command=lambda: open_page('neraca_saldo'))
+button_neraca_saldo.pack(pady=10, fill="x")
+
+button_laba_rugi = ttk.Button(frame_sidebar, text="Laporan Laba Rugi", command=lambda: open_page('laba_rugi'))
+button_laba_rugi.pack(pady=10, fill="x")
+
+button_ekuitas = ttk.Button(frame_sidebar, text="Laporan Ekuitas", command=lambda: open_page('ekuitas'))
+button_ekuitas.pack(pady=10, fill="x")
+
+button_tambah_data = ttk.Button(frame_sidebar, text="Tambah Data", command=popup_input_data)
+button_tambah_data.pack(pady=10, fill="x")
+
+# Label dan Tombol untuk Menambah Data
+tk.Label(frame_content, text="Program Aplikasi Akuntansi", font=("Arial", 18), bg="sky blue").pack(pady=10)
 
 # Tabel untuk menampilkan data
 columns = ("Tanggal", "No. Produk", "No. Akun", "Nama Akun", "Debet", "Kredit")
-tree = ttk.Treeview(window, columns=columns, show="headings", style="Treeview")
+tree = ttk.Treeview(frame_content, columns=columns, show="headings", style="Treeview")
 for col in columns:
     tree.heading(col, text=col)
 tree.pack(pady=10)
 
 # Ganti tk.Label dengan ttk.Label
-label_total_debit = ttk.Label(window, text="Total Debit: 0", style="TLabel")
+label_total_debit = ttk.Label(frame_content, text="Total Debit: 0", style="TLabel")
 label_total_debit.pack(pady=5)
 
-label_total_kredit = ttk.Label(window, text="Total Kredit: 0", style="TLabel")
+label_total_kredit = ttk.Label(frame_content, text="Total Kredit: 0", style="TLabel")
 label_total_kredit.pack(pady=5)
 
 # Membuat database jika belum ada
