@@ -20,7 +20,7 @@ frame_content = tk.Frame(window, bg="white")
 frame_content.grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
 
 # Membuat sidebar di kiri
-current_page = "dashboard"  # Set halaman default
+current_page = "dashboard" 
 create_sidebar(window, frame_content, current_page)
 
 # Menambahkan header di bagian konten utama

@@ -4,21 +4,6 @@ from tkcalendar import Calendar
 import sqlite3
 from datetime import datetime
 
-# Fungsi untuk membuat koneksi dan tabel di database SQLite
-# def create_db():
-#     conn = sqlite3.connect('data.db')
-#     c = conn.cursor()
-#     c.execute('''CREATE TABLE IF NOT EXISTS data_akuntansi (
-#                     id INTEGER PRIMARY KEY,
-#                     tanggal TEXT,
-#                     no_produk TEXT,
-#                     no_akun TEXT,
-#                     nama_akun TEXT,
-#                     debet REAL,
-#                     kredit REAL)''')
-#     conn.commit()
-#     conn.close()
-
 # Fungsi untuk menambah data ke database
 def tambah_data(tanggal, no_produk, no_akun, nama_akun, debet, kredit):
     conn = sqlite3.connect('data.db')
@@ -125,30 +110,41 @@ def create_page(parent):
     header = tk.Label(parent, text="Input Data Jurnal Umum", font=("Arial", 18), bg="sky blue", anchor="w", padx=20)
     header.pack(fill="x", pady=10)
 
+    # Buat canvas dan scrollbar untuk menggulir seluruh halaman
+    canvas = tk.Canvas(parent)
+    scrollbar = tk.Scrollbar(parent, orient="vertical", command=canvas.yview)
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    # Letakkan canvas dan scrollbar di frame
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    # Buat frame untuk menampung semua elemen dalam canvas
+    page_frame = tk.Frame(canvas)
+    canvas.create_window((0, 0), window=page_frame, anchor="nw")
+
     # Frame untuk tombol tambah data
-    frame_tambah_data = tk.Frame(parent)
+    frame_tambah_data = tk.Frame(page_frame)
     frame_tambah_data.pack(pady=10)
-    
-    tk.Button(frame_tambah_data, text="Tambah Data", command=lambda: popup_input_data(parent, tree, label_total_debit, label_total_kredit)).pack()
+    tk.Button(frame_tambah_data, text="Tambah Data", command=lambda: popup_input_data(page_frame, tree, label_total_debit, label_total_kredit)).pack()
 
     # Tabel untuk menampilkan data
     columns = ("Tanggal", "No. Produk", "No. Akun", "Nama Akun", "Debet", "Kredit")
-    tree = ttk.Treeview(parent, columns=columns, show="headings")
+    tree = ttk.Treeview(page_frame, columns=columns, show="headings")
     for col in columns:
         tree.heading(col, text=col)
     tree.pack(pady=10)
 
     # Label untuk menampilkan Total Debit dan Kredit
-    label_total_debit = tk.Label(parent, text="Total Debit: 0")
+    label_total_debit = tk.Label(page_frame, text="Total Debit: 0")
     label_total_debit.pack(pady=5)
 
-    label_total_kredit = tk.Label(parent, text="Total Kredit: 0")
+    label_total_kredit = tk.Label(page_frame, text="Total Kredit: 0")
     label_total_kredit.pack(pady=5)
 
     # Menampilkan data pertama kali
     tampilkan_data(tree, label_total_debit, label_total_kredit)
 
-
-
-# Membuat database jika belum ada
-# create_db()
+    # Update scrollregion untuk canvas setelah semua data dimasukkan
+    page_frame.update_idletasks()  # Update layout
+    canvas.config(scrollregion=canvas.bbox("all"))  # Tentukan area yang dapat discroll
