@@ -5,19 +5,19 @@ import sqlite3
 from datetime import datetime
 
 # Fungsi untuk membuat koneksi dan tabel di database SQLite
-def create_db():
-    conn = sqlite3.connect('data.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS data_akuntansi (
-                    id INTEGER PRIMARY KEY,
-                    tanggal TEXT,
-                    no_produk TEXT,
-                    no_akun TEXT,
-                    nama_akun TEXT,
-                    debet REAL,
-                    kredit REAL)''')
-    conn.commit()
-    conn.close()
+# def create_db():
+#     conn = sqlite3.connect('data.db')
+#     c = conn.cursor()
+#     c.execute('''CREATE TABLE IF NOT EXISTS data_akuntansi (
+#                     id INTEGER PRIMARY KEY,
+#                     tanggal TEXT,
+#                     no_produk TEXT,
+#                     no_akun TEXT,
+#                     nama_akun TEXT,
+#                     debet REAL,
+#                     kredit REAL)''')
+#     conn.commit()
+#     conn.close()
 
 # Fungsi untuk menambah data ke database
 def tambah_data(tanggal, no_produk, no_akun, nama_akun, debet, kredit):
@@ -148,16 +148,7 @@ def create_page(parent):
     # Menampilkan data pertama kali
     tampilkan_data(tree, label_total_debit, label_total_kredit)
 
-# GUI utama
-# window = tk.Tk()
-# window.title("Input Data Jurnal Umum")
-# window.geometry("1200x600")
+
 
 # Membuat database jika belum ada
-create_db()
-
-# Membuat halaman utama
-# create_page(window)
-
-# Menjalankan aplikasi
-# window.mainloop()
+# create_db()
