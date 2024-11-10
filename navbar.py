@@ -43,9 +43,7 @@ def create_sidebar(window, frame_content, current_page):
                                           lambda: update_page(window, frame_content, "accounts", current_page))
     button_neraca_saldo = create_rounded_button(frame_sidebar, "banking", 3, 0, 
                                                 lambda: update_page(window, frame_content, "banking", current_page))
-    button_laba_rugi = create_rounded_button(frame_sidebar, "Sales", 4, 0, 
-                                             lambda: update_page(window, frame_content, "sales", current_page))
-    button_ekuitas = create_rounded_button(frame_sidebar, "Purchase", 5, 0, 
+    button_ekuitas = create_rounded_button(frame_sidebar, "Purchase", 4, 0, 
                                            lambda: update_page(window, frame_content, "purchase", current_page))
 
     return frame_sidebar
