@@ -3,11 +3,11 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 # Fungsi untuk menambahkan akun
-def tambah_akun(no_akun, nama_rekening):
+def tambah_akun(no_akun, nama_rekening, beban):
     conn = sqlite3.connect('data.db')
     c = conn.cursor()
     try:
-        c.execute("INSERT INTO akun (no_akun, nama_rekening) VALUES (?, ?)", (no_akun, nama_rekening))
+        c.execute("INSERT INTO akun (no_akun, nama_rekening, beban) VALUES (?, ?, ?)", (no_akun, nama_rekening, beban))
         conn.commit()
         messagebox.showinfo("Success", "Akun berhasil ditambahkan")
     except sqlite3.IntegrityError:
@@ -15,10 +15,10 @@ def tambah_akun(no_akun, nama_rekening):
     conn.close()
 
 # Fungsi untuk mengedit akun
-def edit_akun(id_akun, no_akun, nama_rekening):
+def edit_akun(id_akun, no_akun, nama_rekening, beban):
     conn = sqlite3.connect('data.db')
     c = conn.cursor()
-    c.execute("UPDATE akun SET no_akun = ?, nama_rekening = ? WHERE id_akun = ?", (no_akun, nama_rekening, id_akun))
+    c.execute("UPDATE akun SET no_akun = ?, nama_rekening = ?, beban = ? WHERE id_akun = ?", (no_akun, nama_rekening, beban, id_akun))
     conn.commit()
     conn.close()
     messagebox.showinfo("Success", "Akun berhasil diperbarui")
@@ -44,7 +44,9 @@ def tampilkan_akun(tree):
     conn.close()
 
     for row in rows:
-        tree.insert("", "end", values=row)
+        # Mengubah nilai beban 0 atau 1 menjadi Yes atau No
+        beban_display = "Yes" if row[3] == 1 else "No"
+        tree.insert("", "end", values=(row[0], row[1], row[2], beban_display))
 
 # Fungsi untuk menambahkan user
 def tambah_user(username, password, nama):
@@ -111,7 +113,7 @@ def create_page(parent):
     label_akun.pack(pady=10)
 
     # Treeview untuk menampilkan akun
-    columns = ("ID Akun", "No Akun", "Nama Rekening")
+    columns = ("ID Akun", "No Akun", "Nama Rekening", "Beban")
     tree_akun = ttk.Treeview(tab_akun, columns=columns, show="headings")
     for col in columns:
         tree_akun.heading(col, text=col)
@@ -130,11 +132,22 @@ def create_page(parent):
     entry_nama_rekening = tk.Entry(form_frame_akun)
     entry_nama_rekening.grid(row=1, column=1)
 
+    # Menambahkan pilihan Yes/No untuk 'beban'
+    beban_var = tk.IntVar()  # Variabel untuk menampung nilai 0 atau 1
+    beban_var.set(0)  # Defaultnya adalah No (beban = 0)
+
+    tk.Label(form_frame_akun, text="Apakah Beban?").grid(row=2, column=0)
+    radio_no = tk.Radiobutton(form_frame_akun, text="No", variable=beban_var, value=0)
+    radio_no.grid(row=2, column=1)
+    radio_yes = tk.Radiobutton(form_frame_akun, text="Yes", variable=beban_var, value=1)
+    radio_yes.grid(row=2, column=2)
+
     def add_akun():
         no_akun = entry_no_akun.get()
         nama_rekening = entry_nama_rekening.get()
+        beban = beban_var.get()  # Ambil nilai beban (0 atau 1)
         if no_akun and nama_rekening:
-            tambah_akun(no_akun, nama_rekening)
+            tambah_akun(no_akun, nama_rekening, beban)
             tampilkan_akun(tree_akun)
         else:
             messagebox.showerror("Error", "Semua kolom harus diisi")
@@ -145,8 +158,9 @@ def create_page(parent):
             id_akun = tree_akun.item(selected_item)["values"][0]
             no_akun = entry_no_akun.get()
             nama_rekening = entry_nama_rekening.get()
+            beban = beban_var.get()  # Ambil nilai beban (0 atau 1)
             if no_akun and nama_rekening:
-                edit_akun(id_akun, no_akun, nama_rekening)
+                edit_akun(id_akun, no_akun, nama_rekening, beban)
                 tampilkan_akun(tree_akun)
             else:
                 messagebox.showerror("Error", "Semua kolom harus diisi")

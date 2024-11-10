@@ -20,7 +20,8 @@ def create_db():
     c.execute('''CREATE TABLE IF NOT EXISTS akun (
                     id_akun TEXT PRIMARY KEY,
                     no_akun TEXT,
-                    nama_rekening TEXT)''')
+                    nama_rekening,
+                    beban INTEGER)''')
 
     # Membuat tabel user (untuk login pengguna)
     c.execute('''CREATE TABLE IF NOT EXISTS user (

@@ -72,9 +72,13 @@ def popup_input_data(parent, tree, label_total_debit, label_total_kredit):
         kredit = entry_kredit.get()
         
         # Validasi input
-        if not no_produk or not no_akun or not keterangan or (not debet and not kredit):
+        if not no_akun or not keterangan or (not debet and not kredit):
             messagebox.showerror("Error", "Semua kolom harus diisi dengan benar!")
             return
+
+        # Jika no_produk kosong, kita set menjadi None atau string kosong
+        if not no_produk:
+            no_produk = None  # Atau bisa "" jika diinginkan
         
         # Atur debet dan kredit secara otomatis
         debet = float(debet) if debet else 0
