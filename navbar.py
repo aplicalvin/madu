@@ -2,40 +2,51 @@ import tkinter as tk
 from tkinter import ttk
 import importlib
 import sys
+from tkinter import font
 
 # Menambahkan folder pages ke sys.path agar bisa ditemukan oleh importlib
 sys.path.append('./pages')  # Pastikan folder 'pages' ada di jalur yang benar
 
 # Fungsi untuk membuat sidebar/navbar
 def create_sidebar(window, frame_content, current_page):
-    # Frame Sidebar
-    frame_sidebar = tk.Frame(window, width=300, bg="sky blue", height=window.winfo_height())
+    # Frame Sidebar dengan warna hijau muda
+    frame_sidebar = tk.Frame(window, width=300, bg="#A8D5BA", height=window.winfo_height())
     frame_sidebar.grid(row=0, column=0, sticky="ns")  # Gunakan grid alih-alih pack
 
+    # Menentukan style untuk tombol dengan font Comic Sans MS
+    button_style = ttk.Style()
+    button_style.configure("TButton",
+                           font=("Comic Sans MS", 12, "bold"),  # Menggunakan Comic Sans MS dengan bold
+                           padding=10,
+                           relief="flat",  # Menghilangkan border pada tombol
+                           background="#A8D5BA",  # Warna hijau muda untuk tombol
+                           foreground="black")
+
+    # Menambahkan efek hover untuk tombol
+    button_style.map("TButton", 
+                     background=[('active', '#7FB5B5')])  # Warna lebih gelap saat hover
+
+    # Fungsi untuk membuat tombol dengan sudut rounded
+    def create_rounded_button(parent, text, row, col, command):
+        button = ttk.Button(parent, text=text, style="TButton", command=command)
+        button.grid(row=row, column=col, pady=10, sticky="ew")
+        
+        # Styling tombol untuk rounded corners
+        button.configure(width=15)  # Menentukan lebar tombol agar sudut lebih jelas
+        button.grid_configure(padx=10, pady=5)
+        return button
+
     # Tombol Navigasi - Setiap tombol memiliki baris yang unik pada grid
-    button_buku_besar = ttk.Button(frame_sidebar, text="Buku Besar", 
-                                    command=lambda: update_page(window, frame_content, "buku_besar", current_page))
-    button_buku_besar.grid(row=2, column=0, pady=10, sticky="ew")
-
-    button_jurnal = ttk.Button(frame_sidebar, text="Jurnal Umum", 
-                               command=lambda: update_page(window, frame_content, "jurnal", current_page))
-    button_jurnal.grid(row=1, column=0, pady=10, sticky="ew")  # Beri baris yang berbeda
-
-    button_neraca_saldo = ttk.Button(frame_sidebar, text="Neraca Saldo", 
-                                     command=lambda: update_page(window, frame_content, "neraca_saldo", current_page))
-    button_neraca_saldo.grid(row=3, column=0, pady=10, sticky="ew")
-
-    button_laba_rugi = ttk.Button(frame_sidebar, text="Laporan Laba Rugi", 
-                                  command=lambda: update_page(window, frame_content, "laba_rugi", current_page))
-    button_laba_rugi.grid(row=4, column=0, pady=10, sticky="ew")
-
-    button_ekuitas = ttk.Button(frame_sidebar, text="Laporan Ekuitas", 
-                                command=lambda: update_page(window, frame_content, "ekuitas", current_page))
-    button_ekuitas.grid(row=5, column=0, pady=10, sticky="ew")
-
-    button_ekuitas = ttk.Button(frame_sidebar, text="Pengaturan", 
-                                command=lambda: update_page(window, frame_content, "setting", current_page))
-    button_ekuitas.grid(row=6, column=0, pady=10, sticky="ew")
+    button_buku_besar = create_rounded_button(frame_sidebar, "Inventory", 1, 0, 
+                                              lambda: update_page(window, frame_content, "inventory", current_page))
+    button_jurnal = create_rounded_button(frame_sidebar, "Accounts", 2, 0, 
+                                          lambda: update_page(window, frame_content, "accounts", current_page))
+    button_neraca_saldo = create_rounded_button(frame_sidebar, "banking", 3, 0, 
+                                                lambda: update_page(window, frame_content, "banking", current_page))
+    button_laba_rugi = create_rounded_button(frame_sidebar, "Sales", 4, 0, 
+                                             lambda: update_page(window, frame_content, "sales", current_page))
+    button_ekuitas = create_rounded_button(frame_sidebar, "Purchase", 5, 0, 
+                                           lambda: update_page(window, frame_content, "purchase", current_page))
 
     return frame_sidebar
 

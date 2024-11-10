@@ -1,33 +1,33 @@
-import tkinter as tk
-from tkinter import ttk 
+# style.py
 import tkinter as tk
 from tkinter import ttk
+from tkinter import PhotoImage
 
 def apply_styles(window):
-    # Styling untuk window utama
-    window.configure(bg='sky blue')  # Mengubah warna latar belakang utama
+    # Ganti warna latar belakang window utama menjadi hijau muda
+    window.configure(bg='#90EE90')  # Mengubah warna latar belakang utama menjadi hijau muda
     
     # Membuat objek style
     style = ttk.Style()
 
     # Set style untuk Treeview (tabel)
     style.configure("Treeview",
-                    background="lightblue",
+                    background="#b0e57c",  # Warna latar belakang tabel (hijau muda)
                     foreground="black",
-                    fieldbackground="lightblue")
+                    fieldbackground="#b0e57c")
     style.configure("Treeview.Heading",
-                    background="skyblue",
+                    background="#90EE90",  # Warna header hijau muda
                     font=("Arial", 10, 'bold'))
 
     # Set style untuk tombol
     style.configure("TButton",
-                    background="skyblue",
+                    background="#90EE90",  # Warna tombol hijau muda
                     font=("Arial", 10, 'bold'),
                     padding=10)
 
     # Set style untuk label
     style.configure("TLabel",
-                    background="skyblue",
+                    background="#90EE90",  # Warna latar belakang label hijau muda
                     font=("Arial", 12))
     
     return style
