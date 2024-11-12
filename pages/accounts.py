@@ -104,7 +104,7 @@ def account_list():
             # Update akun yang dipilih
             conn = connect_db()
             c = conn.cursor()
-            c.execute('''UPDATE accounts SET account_number = ?, account_name = ?, account_type = ?
+            c.execute('''UPDATE accounts SET account_number = ?, account_name = ?, account_type = ? 
                          WHERE account_id = ?''', (account_number, account_name, account_type, account_id))
             conn.commit()
             conn.close()
@@ -177,7 +177,7 @@ def account_list():
         selected_item = tree.selection()[0]
         account_id = tree.item(selected_item)['values'][0]  # Ambil account_id
         action = messagebox.askquestion("Action", "Do you want to Edit or Delete this account?", icon='question')
-        
+
         if action == 'yes':  # Edit
             edit_account(account_id)
         elif action == 'no':  # Delete
@@ -238,50 +238,99 @@ def record_journal_entry():
 
     tk.Button(record_journal_window, text="Save Journal Entry", command=save_journal).pack(pady=20)
 
-# Fungsi untuk menampilkan jurnal transaksi
-def transaction_journal():
-    def filter_transactions():
-        filter_date = date_filter_entry.get()
+# Fungsi untuk menampilkan General Ledger (Buku Besar)
+def general_ledger():
+    def generate_ledger():
         conn = connect_db()
         c = conn.cursor()
-        if filter_date:
-            c.execute("SELECT * FROM transactions WHERE transaction_date LIKE ?", (filter_date+'%',))
-        else:
-            c.execute("SELECT * FROM transactions")
-        rows = c.fetchall()
-        conn.close()
         
-        # Update Treeview
+        # Mengambil semua akun
+        c.execute("SELECT account_id, account_name FROM accounts")
+        accounts = c.fetchall()
+
+        # Mengambil entri jurnal terkait setiap akun
+        ledger_data = []
+        for account in accounts:
+            account_id, account_name = account
+            c.execute('''SELECT date, debit, credit, memo FROM journal_entries 
+                         WHERE account_id = ? ORDER BY date''', (account_id,))
+            journal_entries = c.fetchall()
+            
+            total_debit = 0
+            total_credit = 0
+
+            for entry in journal_entries:
+                date, debit, credit, memo = entry
+                total_debit += debit if debit else 0
+                total_credit += credit if credit else 0
+                ledger_data.append((account_name, date, debit, credit, total_debit - total_credit, memo))
+
+        conn.close()
+
+        # Menampilkan data di Treeview
         for row in tree.get_children():
             tree.delete(row)
-        
-        for row in rows:
+
+        for row in ledger_data:
             tree.insert("", "end", values=row)
 
-    transaction_journal_window = tk.Toplevel()
-    transaction_journal_window.title("Transaction Journal")
+    general_ledger_window = tk.Toplevel()
+    general_ledger_window.title("General Ledger")
 
-    # Filter by Date
-    tk.Label(transaction_journal_window, text="Filter by Date (YYYY-MM-DD):").pack(pady=5)
-    date_filter_entry = tk.Entry(transaction_journal_window)
-    date_filter_entry.pack(pady=5)
-    
-    tk.Button(transaction_journal_window, text="Filter", command=filter_transactions).pack(pady=10)
-
-    # Treeview untuk menampilkan data transaksi
-    columns = ("transaction_id", "transaction_date", "account_id", "amount", "description")
-    tree = ttk.Treeview(transaction_journal_window, columns=columns, show="headings")
+    columns = ("account_name", "date", "debit", "credit", "balance", "memo")
+    tree = ttk.Treeview(general_ledger_window, columns=columns, show="headings")
     tree.pack(pady=20, fill="both", expand=True)
 
     for col in columns:
         tree.heading(col, text=col)
 
-    # Memanggil data awal
-    filter_transactions()
+    # Tombol untuk menghasilkan buku besar
+    tk.Button(general_ledger_window, text="Generate General Ledger", command=generate_ledger).pack(pady=10)
 
-# Fungsi untuk halaman General Ledger (kosongkan dulu)
-def general_ledger():
-    messagebox.showinfo("General Ledger", "Halaman General Ledger.")
+# Fungsi untuk transaksi journal (Tidak diubah)
+def transaction_journal():
+    def save_transaction():
+        account_id = account_combobox.get()
+        amount = amount_entry.get()
+        description = description_entry.get()
+
+        if not amount:
+            messagebox.showerror("Error", "Amount must be filled.")
+            return
+
+        conn = connect_db()
+        c = conn.cursor()
+        c.execute('''INSERT INTO transactions (account_id, amount, description) 
+                     VALUES (?, ?, ?)''', (account_id, amount, description))
+        conn.commit()
+        conn.close()
+
+        messagebox.showinfo("Success", "Transaction successfully recorded.")
+        transaction_window.destroy()
+
+    transaction_window = tk.Toplevel()
+    transaction_window.title("Transaction Journal")
+
+    # ComboBox untuk memilih akun
+    conn = connect_db()
+    c = conn.cursor()
+    c.execute("SELECT account_id, account_name FROM accounts")
+    accounts = c.fetchall()
+    conn.close()
+
+    account_list = [account[1] for account in accounts]
+    account_combobox = ttk.Combobox(transaction_window, values=account_list, state="readonly")
+    account_combobox.pack(pady=5)
+
+    tk.Label(transaction_window, text="Amount").pack(pady=5)
+    amount_entry = tk.Entry(transaction_window)
+    amount_entry.pack(pady=5)
+
+    tk.Label(transaction_window, text="Description").pack(pady=5)
+    description_entry = tk.Entry(transaction_window)
+    description_entry.pack(pady=5)
+
+    tk.Button(transaction_window, text="Save Transaction", command=save_transaction).pack(pady=20)
 
 # Halaman utama dengan tombol
 def create_page(parent):
