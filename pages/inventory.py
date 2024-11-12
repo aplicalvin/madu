@@ -90,9 +90,66 @@ def item_register(parent):
     # Memanggil data awal
     filter_items()
 
-# Fungsi untuk halaman jurnal inventaris (sederhana, bisa diperluas)
+# Fungsi untuk halaman jurnal inventaris
 def inventory_journal():
-    messagebox.showinfo("Inventory Journal", "Menampilkan jurnal inventaris.")
+    def load_journal():
+        conn = connect_db()
+        c = conn.cursor()
+        c.execute("SELECT * FROM inventory ORDER BY date_added DESC")
+        rows = c.fetchall()
+        conn.close()
+
+        # Clear the existing treeview
+        for row in tree.get_children():
+            tree.delete(row)
+
+        # Insert the new data
+        for row in rows:
+            tree.insert("", "end", values=row)
+
+    def add_journal_entry():
+        kode_item_teh = kode_item_entry.get()
+        memo = memo_entry.get()
+        if not kode_item_teh or not memo:
+            messagebox.showwarning("Input Error", "Please fill in both fields!")
+            return
+        
+        date_added = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        conn = connect_db()
+        c = conn.cursor()
+        c.execute('''INSERT INTO inventory (kode_item_teh, date_added, memo) 
+                     VALUES (?, ?, ?)''', (kode_item_teh, date_added, memo))
+        conn.commit()
+        conn.close()
+
+        messagebox.showinfo("Success", "Journal entry added successfully.")
+        load_journal()
+    
+    inventory_journal_window = tk.Toplevel()
+    inventory_journal_window.title("Inventory Journal")
+
+    # Input fields for new journal entry
+    tk.Label(inventory_journal_window, text="Kode Item Teh:").pack(pady=5)
+    kode_item_entry = tk.Entry(inventory_journal_window)
+    kode_item_entry.pack(pady=5)
+
+    tk.Label(inventory_journal_window, text="Memo:").pack(pady=5)
+    memo_entry = tk.Entry(inventory_journal_window)
+    memo_entry.pack(pady=5)
+
+    tk.Button(inventory_journal_window, text="Add Journal Entry", command=add_journal_entry).pack(pady=10)
+
+    # Treeview to display journal entries
+    columns = ("item_id", "kode_item_teh", "date_added", "memo")
+    tree = ttk.Treeview(inventory_journal_window, columns=columns, show="headings")
+    tree.pack(pady=20, fill="both", expand=True)
+
+    for col in columns:
+        tree.heading(col, text=col)
+
+    # Load the journal entries
+    load_journal()
 
 # Halaman utama dengan tombol
 def create_page(parent):
